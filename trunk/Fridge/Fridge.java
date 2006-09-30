@@ -1,3 +1,20 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.sql.Connection;
+import java.sql.Statement;
+
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,148 +29,85 @@ import java.sql.Statement;
 import java.util.Vector;
 
 /**
- * 
+ * This code was edited or generated using CloudGarden's Jigloo SWT/Swing GUI
+ * Builder, which is free for non-commercial use. If Jigloo is being used
+ * commercially (ie, by a corporation, company or business for any purpose
+ * whatever) then you should purchase a license for each developer using Jigloo.
+ * Please visit www.cloudgarden.com for details. Use of Jigloo implies
+ * acceptance of these licensing terms. A COMMERCIAL LICENSE HAS NOT BEEN
+ * PURCHASED FOR THIS MACHINE, SO JIGLOO OR THIS CODE CANNOT BE USED LEGALLY FOR
+ * ANY CORPORATE OR COMMERCIAL PURPOSE.
  */
+public class Fridge extends javax.swing.JFrame implements ActionListener, KeyListener {
+	private JPanel jPanel1;
 
-/**
- * @author eglen
- *
- *create table USERS (id char(14), name char(255), email char(255))
- */
-public class Fridge {
+	private JTextField consoleInputField;
 
-	static Vector tableList;
-	/**
-	 * @param args
-	 * @throws SQLException 
-	 * @throws IOException 
-	 */
-	public static void main(String[] args) throws SQLException, IOException {
-		
-		/*
-		 *       Register the JDBC driver for dBase
-		 */
-		try{
-		         Class.forName("com.sqlmagic.tinysql.dbfFileDriver");
-		      } catch (ClassNotFoundException e) {
-		         System.err.println(
-		              "JDBC Driver could not be registered!!\n");
-		      }
-		      String fName = ".";
-		      /* 
-		       *    Establish a connection to dBase
-		       */
-		      Connection con = dbConnect(fName);
-				
-				//Print out the current list of tabs
-				Statement stmt = con.createStatement();
-				ResultSet rs = null;
-				rs = stmt.executeQuery("SELECT * from USERS");
-				displayResults(rs);
-				
-		//Infinite loop looking for input
-		while(true)
-		{
-			//Ask for card
-			for(int i=0;i<35;i++)
-			{
-				System.out.println("");
-			}
-			System.out.print("Please Scan Student Card:");
-			
-			//Wait for card #
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	private JTextArea consoleDisplay;
 
-		      //  read the username from the command-line; need to use try/catch with the
-		      //  readLine() method
-		      String userId = br.readLine();
-		      if(userId.length() == 14)
-		      {
-		    	  	//Has the right number of digits see if they're in the db
-					rs = stmt.executeQuery("SELECT * from USERS WHERE Id='" + userId +"'");
-					rs.next();
-					if(rs.getString("NAME") == null)
-					{
-						//this person doesn't already exist.. make an account for them
-						System.out.println("I don't have you on record.");
-						System.out.print("Please Enter your name:");
-						String name = br.readLine();
-					     System.out.print("Please Enter your email address (we'll use this if we move the fridge or prices change):");
-							String email =  br.readLine();
-						//Put their data into the database
-						stmt.executeQuery("INSERT INTO USERS (ID, NAME, EMAIL, TAB) VALUES ('" + userId + "','" + name + "','" + email +"','" + 0 + "')");
-						rs = stmt.executeQuery("SELECT * from USERS WHERE Id='" + userId +"'");
-						rs.next();
-						System.out.println("User " + rs.getString("NAME") + " added" + '\n');
-					}
-					if(rs.getString("NAME") != null)
-					{
-						//must be some data here,
-						System.out.println("Hello " + rs.getString("NAME"));
-						int tab = rs.getInt("TAB");
-						System.out.println("Your current tab is: " + (double)tab/100);	
-						System.out.println("Please scan the top of the fridge to add money to your account");
-						System.out.println("Scan your student card to quit" + '\n');
-						//Now keep scanning items while decrementing their tab
-						String pId = br.readLine();
-						while (pId.length() != 14)
-						{
-							//See if this product exists in the database
-							rs = stmt.executeQuery("SELECT * from PRODUCTS WHERE ID = '" + pId + "'");
-							rs.next();
-							if(rs.getString("NAME") == null)
-							{
-								//Product does not exist
-								System.out.println("This product does not exist in the database.");
-								System.out.print("Please enter the name of the product:");
-								String pName = br.readLine();
-								stmt.executeQuery("INSERT INTO PRODUCTS (ID, NAME, COST, COUNT) VALUES ('" + pId + "','" + pName + "','-75','0')");
-								rs = stmt.executeQuery("SELECT * from PRODUCTS WHERE ID = '" + pId + "'");
-								rs.next();
-							}
-							if(rs.getString("NAME") != null)
-							{
-								//Found a product
-								String productName = rs.getString("NAME");
-								int cost = rs.getInt("COST");
-								int count = rs.getInt("COUNT") + 1;
-								tab += cost;
-								System.out.println(productName + '\t' + (double)tab/100);
-								//Update the database
-								stmt.executeQuery("UPDATE USERS SET TAB='" + tab + "' WHERE ID = '" + userId +"'");
-								
-								stmt.executeQuery("UPDATE PRODUCTS SET COUNT='" + count + "' WHERE ID = '" + pId + "'");
-							}
-						    pId = br.readLine();
-						}
-					}
-		      }
-		      else
-		      {
-		    	  System.out.println("Invalid Student Card I think.  If I'm wrong talk to Ed or email him: eglen@cs.sfu.ca");
-		      }
+	private JScrollPane consoleScrollPane;
+
+	private JLabel instructionsLabel;
+	
+	private Vector tableList;
+	
+	private Statement stmt = null;
+
+	{
+		// Set Look & Feel
+		try {
+			javax.swing.UIManager
+					.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Auto-generated main method to display this JFrame
+	 */
+	public static void main(String[] args) {
+		Fridge inst = new Fridge();
+		inst.setVisible(true);
+		
+	}
+
+	public Fridge() {
+		super();
+		initGUI();
+		//Setup Listeners
+		consoleInputField.addActionListener(this);
+		consoleInputField.addKeyListener(this);
+		//setup db connection
+		try {
+			stmt = getDbStatement();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+
+	private Statement getDbStatement() throws SQLException {
+		/*
+		 * Register the JDBC driver for dBase
+		 */
+		try {
+			Class.forName("com.sqlmagic.tinysql.dbfFileDriver");
+		} catch (ClassNotFoundException e) {
+			System.err.println("JDBC Driver could not be registered!!\n");
+		}
+		String fName = ".";
+		/*
+		 * Establish a connection to dBase
+		 */
+		Connection con = dbConnect(fName);
+
+		// Print out the current list of tabs
+		Statement stmt = con.createStatement();
+		return stmt;
+	}
 	
-	private static String padString(int inputint, int padLength)
-	   {
-	      return padString(Integer.toString(inputint),padLength);
-	   }
-	   private static String padString(String inputString, int padLength)
-	   {
-	      String outputString;
-	      String blanks = "                                        ";
-	      if ( inputString == (String)null )
-	         outputString = blanks + blanks + blanks;
-	      else
-	         outputString = inputString;
-	      if ( outputString.length() > padLength )
-	         return outputString.substring(0,padLength);
-	      else
-	         outputString = outputString + blanks + blanks + blanks;
-	         return outputString.substring(0,padLength);
-	   }
-	private static Connection dbConnect(String tinySQLDir) throws SQLException
+	private Connection dbConnect(String tinySQLDir) throws SQLException
 	   {
 	      Connection con=null;
 	      DatabaseMetaData dbMeta;
@@ -186,60 +140,87 @@ public class Fridge {
 	         + " in this directory.");
 	      return con;
 	   }
-	
-	/**
-	  Formatted output to stdout
-	  @return number of tuples
-	  */
-	  static int displayResults(ResultSet rs) throws java.sql.SQLException
-	  {
-	    if (rs == null) {
-	      System.err.println("ERROR in displayResult(): No data in ResulSet");
-	      return 0;
-	    }
 
-	    int numCols = 0;
+	private void initGUI() {
+		Font instructionsFont = new Font("Arial", Font.PLAIN, 36);
+		Font consoleFont = new Font("Arial", Font.PLAIN, 24);
+		Font inputFont = new Font("Arial", Font.PLAIN, 24);
+		try {
+			{
+				jPanel1 = new JPanel();
+				BoxLayout mainBoxLayout = new BoxLayout(jPanel1,
+						javax.swing.BoxLayout.Y_AXIS);
+				getContentPane().add(jPanel1, BorderLayout.CENTER);
+				jPanel1.setLayout(mainBoxLayout);
+				{
+					instructionsLabel = new JLabel();
+					jPanel1.add(instructionsLabel);
+					instructionsLabel.setText("Scan Items");
+					// instructionsLabel.setPreferredSize(new
+					// java.awt.Dimension(80, 50));
+					instructionsLabel.setFont(instructionsFont);
+					instructionsLabel.setForeground(Color.RED);
+				}
+				{
+					consoleScrollPane = new JScrollPane();
+					jPanel1.add(consoleScrollPane);
+					consoleScrollPane.setPreferredSize(new java.awt.Dimension(
+							392, 193));
+					{
+						consoleDisplay = new JTextArea();
+						consoleScrollPane.setViewportView(consoleDisplay);
+						// consoleDisplay.setText("Items:");
+						consoleDisplay.setFont(consoleFont);
+						consoleDisplay.setEditable(false);
+					}
+				}
+				{
+					consoleInputField = new JTextField();
+					jPanel1.add(consoleInputField);
+					// consoleInputField.setText("inputField");
+					consoleInputField.setMaximumSize(new java.awt.Dimension(
+							5000, 50));
+					consoleInputField.setPreferredSize(new java.awt.Dimension(
+							541, 50));
+					consoleInputField.setFont(inputFont);
+				}
+			}
+			this.setSize(549, 481);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-	    ResultSetMetaData meta = rs.getMetaData();
-	    int cols = meta.getColumnCount();
-	    int[] width = new int[cols];
-	    String dashes = "=============================================";
+	public void actionPerformed(ActionEvent arg0) {
+		System.out.println("Enter pressed - this could be an unknown code?");
+		
+	}
 
-	    // To Display column headers
-	    //
-	    boolean first=true;
-	    StringBuffer head = new StringBuffer();
-	    StringBuffer line = new StringBuffer();
+	public void keyTyped(KeyEvent arg0) {
+				
+	}
 
-	    // fetch each row
-	    //
-	    while (rs.next()) {
+	public void keyPressed(KeyEvent arg0) {
+		
+	}
 
-	      // get the column, and see if it matches our expectations
-	      //
-	      String text = new String();
-	      for (int ii=0; ii<cols; ii++) {
-	        String value = rs.getString(ii+1);
-	        if (first) {
-	          width[ii] = meta.getColumnDisplaySize(ii+1);
-	          if (meta.getColumnName(ii+1).length() > width[ii])
-	            width[ii] = meta.getColumnName(ii+1).length();
-	          head.append(padString(meta.getColumnName(ii+1), width[ii]));
-	          head.append(" ");
-	          line.append(padString(dashes+dashes,width[ii]));
-	          line.append(" ");
-	        }
-	        text += padString(value, width[ii]);
-	        text += " ";   // the gap between the columns
-	      }
-	      if (first) {
-	        System.out.println(head.toString());
-	        System.out.println(line.toString());
-	        first = false;
-	      }
-	      System.out.println(text);
-	      numCols++;
-	    }
-	    return numCols;
-	  }
+	public void keyReleased(KeyEvent arg0) {
+		System.out.println("Checking: " + consoleInputField.getText());
+		//Check as they type.. have to see how bad this is with the scanner
+		/*Product product = new Product(consoleInputField.getText(),stmt);
+		if(product.isValid())
+		{
+			
+		}
+		User user = User.getUser(consoleInputField.getText(),stmt);
+		if(user!=null)
+		{
+			//They entered a user id, close transaction, display tab, updatedb
+		}
+		else
+		{
+			
+		}*/
+	}
+
 }

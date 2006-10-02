@@ -5,28 +5,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.sql.Connection;
-import java.sql.Statement;
-
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
+
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  * This code was edited or generated using CloudGarden's Jigloo SWT/Swing GUI
@@ -52,6 +46,9 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 	private Vector tableList;
 	
 	private Statement stmt = null;
+	
+	//The same transaction is recycled for all transactions
+	private Transaction  transaction = null;
 
 	{
 		// Set Look & Feel
@@ -81,6 +78,7 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 		//setup db connection
 		try {
 			stmt = getDbStatement();
+			transaction = new Transaction(stmt,consoleDisplay);
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -155,7 +153,7 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 				{
 					instructionsLabel = new JLabel();
 					jPanel1.add(instructionsLabel);
-					instructionsLabel.setText("Scan Items");
+					instructionsLabel.setText("Scan Items then Student Card");
 					// instructionsLabel.setPreferredSize(new
 					// java.awt.Dimension(80, 50));
 					instructionsLabel.setFont(instructionsFont);
@@ -192,8 +190,55 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		System.out.println("Enter pressed - this could be an unknown code?");
-		
+		if(consoleInputField.getText().length()
+				> 0)
+		{
+		//System.out.println("Enter pressed - this could be an unknown code?");
+		Product product = new Product(consoleInputField.getText(),stmt);
+		User user = new User(consoleInputField.getText(),stmt);
+		if(product.getName() != null && user.getName() == null)
+		{
+			//Product has been selected, add it to the current transaction (or start a transaction)
+			transaction.add(product);
+			consoleInputField.setText("");
+		}
+		else if (product.getName() == null && user.getName() != null)
+		{
+			//User has been selected.. tell the transaction
+			transaction.setUser(user);
+			consoleInputField.setText("");
+		}
+		else if (product.getName()!= null && user.getName() != null)
+		{
+			//This is a significant problem.. should have an error message here
+		}
+		else
+		{
+			//The user specifically asked us to record this.. must be a new user or product
+			String input = consoleInputField.getText();
+			if(input.length() == 14)
+			{
+				//14 digits.. assuming it's a new user (*Here's hoping no UPCs have 14 digits*) :)
+				String newName =  JOptionPane.showInputDialog("Please enter your Name");
+				String newEmail =  JOptionPane.showInputDialog("Please enter your Email Address");
+				User newUser = new User(input,newName,newEmail,stmt);
+				transaction.setUser(newUser);
+				consoleInputField.setText("");
+				//System.out.println("Made new user");
+			}
+			else
+			{
+				//We assume this is a product.
+				String newName = JOptionPane.showInputDialog("Please enter the name of this product");
+				String newCost = JOptionPane.showInputDialog("Please enter the value of " + newName);
+				Product newProduct = new Product(input,newName,Integer.parseInt(newCost),stmt);
+				transaction.add(newProduct);
+				consoleInputField.setText("");
+				//System.out.println("Made new product");
+			}
+		}
+		}
+		//System.out.flush();
 	}
 
 	public void keyTyped(KeyEvent arg0) {
@@ -207,20 +252,38 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 	public void keyReleased(KeyEvent arg0) {
 		System.out.println("Checking: " + consoleInputField.getText());
 		//Check as they type.. have to see how bad this is with the scanner
-		/*Product product = new Product(consoleInputField.getText(),stmt);
-		if(product.isValid())
+		
+		Product product = new Product(consoleInputField.getText(),stmt);
+		User user = new User(consoleInputField.getText(),stmt);
+		if(product.getName() != null && user.getName() == null)
 		{
-			
+			//Product has been selected, add it to the current transaction (or start a transaction)
+			transaction.add(product);
+			consoleInputField.setText("");
 		}
-		User user = User.getUser(consoleInputField.getText(),stmt);
-		if(user!=null)
+		else if (product.getName() == null && user.getName() != null)
 		{
-			//They entered a user id, close transaction, display tab, updatedb
+			//User has been selected.. tell the transaction
+			transaction.setUser(user);
+			consoleInputField.setText("");
+		}
+		else if (product.getName()!= null && user.getName() != null)
+		{
+			//This is a significant problem.. should have an error message here
 		}
 		else
 		{
-			
-		}*/
+			//Nothing special.. just let things keep going
+			try {
+				//Let the rest of the letters come in before we bother trying again
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//System.out.println("Nothing found with that ID.. waiting");
+		}
+		System.out.flush();
 	}
 
 }

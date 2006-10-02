@@ -58,7 +58,7 @@ public class Transaction {
 				output.append("Your tab: " + user.getTab()/100.0 + '\n');
 				output.append("Thanks, " + user.getName() + '\n');
 				output.append("*Please keep a positive tab to" + '\n' + "*help us maintain product selection." + '\n');
-				
+				new CountdownThread(output).start();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -70,6 +70,7 @@ public class Transaction {
 			output.append("User: " + user.getName() + '\n');
 			output.append("Tab: " + user.getTab()/100.0 + '\n');
 			output.append("*Please keep a positive tab to" + '\n' + "*help us maintain product selection." + '\n');
+			new CountdownThread(output).start();
 		}
 		
 	}

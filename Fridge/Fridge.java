@@ -230,7 +230,7 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 			{
 				//We assume this is a product.
 				String newName = JOptionPane.showInputDialog("Please enter the name of this product");
-				String newCost = JOptionPane.showInputDialog("Please enter the value of " + newName);
+				String newCost = JOptionPane.showInputDialog("Please enter the value of " + newName, "-75");
 				Product newProduct = new Product(input,newName,Integer.parseInt(newCost),stmt);
 				transaction.add(newProduct);
 				consoleInputField.setText("");

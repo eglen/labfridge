@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -83,6 +85,16 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+//		Ability to quit
+	    addWindowListener(new WindowAdapter()
+	    {
+	      public void windowClosing(WindowEvent e)
+	      {
+	        System.out.println("Fridge Closing");
+	        System.exit(0);
+	      }
+	    });
 	}
 
 	private Statement getDbStatement() throws SQLException {

@@ -1,7 +1,7 @@
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.JTextArea;
 
@@ -16,9 +16,13 @@ public class Transaction {
 	//The list of products in the transaction
 	ArrayList products = new ArrayList();
 	
+	//Number formatter
+	DecimalFormat df;
+	
 	public Transaction(Statement stmt, JTextArea consoleDisplay) {
 		this.stmt = stmt;
 		this.output = consoleDisplay;
+		df = new DecimalFormat('\u00A4'+"####.00");
 	}
 
 	public void add(Product product) {
@@ -29,7 +33,7 @@ public class Transaction {
 		}
 		products.add(product);	
 		//update the receipt
-		output.append(product.getName() + '\t' + product.getCost() + '\n');
+		output.append(product.getName() + '\t' + df.format(product.getCost()/100.0) + '\n');
 	}
 
 	public void setUser(User user) {
@@ -54,8 +58,8 @@ public class Transaction {
 				user.setTab(user.getTab()+total);
 				stmt.executeQuery("UPDATE USERS SET TAB='" + user.getTab() + "' WHERE ID = '" + user.getUserId() + "'");
 				output.append("==========" + '\n');
-				output.append("Total this transaction: " + total/100.0 + '\n');
-				output.append("Your tab: " + user.getTab()/100.0 + '\n');
+				output.append("Total this transaction: " + df.format(total/100.0) + '\n');
+				output.append("Your tab: " + df.format(user.getTab()/100.0) + '\n');
 				output.append("Thanks, " + user.getName() + '\n');
 				output.append("*Please keep a positive tab to" + '\n' + "*help us maintain product selection." + '\n');
 				new CountdownThread(output).start();
@@ -68,7 +72,7 @@ public class Transaction {
 		{
 			//If not, print out their tab
 			output.append("User: " + user.getName() + '\n');
-			output.append("Tab: " + user.getTab()/100.0 + '\n');
+			output.append("Tab: " + df.format(user.getTab()/100.0) + '\n');
 			output.append("*Please keep a positive tab to" + '\n' + "*help us maintain product selection." + '\n');
 			new CountdownThread(output).start();
 		}

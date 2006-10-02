@@ -250,7 +250,7 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 	}
 
 	public void keyReleased(KeyEvent arg0) {
-		System.out.println("Checking: " + consoleInputField.getText());
+		//System.out.println("Checking: " + consoleInputField.getText());
 		//Check as they type.. have to see how bad this is with the scanner
 		
 		Product product = new Product(consoleInputField.getText(),stmt);
@@ -283,7 +283,7 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 			}
 			//System.out.println("Nothing found with that ID.. waiting");
 		}
-		System.out.flush();
+		//System.out.flush();
 	}
 
 }

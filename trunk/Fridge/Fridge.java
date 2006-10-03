@@ -286,13 +286,13 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 		else
 		{
 			//Nothing special.. just let things keep going
-			try {
+			/*try {
 				//Let the rest of the letters come in before we bother trying again
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			//System.out.println("Nothing found with that ID.. waiting");
 		}
 		//System.out.flush();

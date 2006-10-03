@@ -1,6 +1,6 @@
 import javax.swing.JTextArea;
 
-public class CountdownThread extends Thread {
+public class CountdownClear extends Thread {
 
 	//	The area to write the countdown to.
 	JTextArea output;
@@ -8,12 +8,12 @@ public class CountdownThread extends Thread {
 	//countdown time (s)
 	int countdownTime = 10;
 	
-	public CountdownThread(JTextArea output)
+	public CountdownClear(JTextArea output)
 	{
 		this.output=output;
 	}
 	
-	public CountdownThread(JTextArea output, int countdownTime)
+	public CountdownClear(JTextArea output, int countdownTime)
 	{
 		this.output=output;
 		this.countdownTime = countdownTime;

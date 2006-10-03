@@ -49,6 +49,8 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 	
 	private Statement stmt = null;
 	
+	private KeyTimer timer = null;
+	
 	//The same transaction is recycled for all transactions
 	private Transaction  transaction = null;
 
@@ -77,6 +79,8 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 		//Setup Listeners
 		consoleInputField.addActionListener(this);
 		consoleInputField.addKeyListener(this);
+		this.addKeyListener(this);
+		consoleDisplay.addKeyListener(this);
 		//setup db connection
 		try {
 			stmt = getDbStatement();
@@ -95,6 +99,8 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 	        System.exit(0);
 	      }
 	    });
+	    
+	    timer = new KeyTimer(this);
 	}
 
 	private Statement getDbStatement() throws SQLException {
@@ -213,12 +219,14 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 			//Product has been selected, add it to the current transaction (or start a transaction)
 			transaction.add(product);
 			consoleInputField.setText("");
+			consoleInputField.requestFocus();
 		}
 		else if (product.getName() == null && user.getName() != null)
 		{
 			//User has been selected.. tell the transaction
 			transaction.setUser(user);
 			consoleInputField.setText("");
+			consoleInputField.requestFocus();
 		}
 		else if (product.getName()!= null && user.getName() != null)
 		{
@@ -261,10 +269,21 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 		
 	}
 
-	public void keyReleased(KeyEvent arg0) {
-		//System.out.println("Checking: " + consoleInputField.getText());
-		//Check as they type.. have to see how bad this is with the scanner
+	public void keyReleased(KeyEvent ke) {
+		/*
+		 * Not sure why but the Sgi loses key focus.. very goofy
+		 * if(ke.getSource()!= consoleInputField)
+		{
+			consoleInputField.setText(consoleInputField.getText()+String.valueOf(ke.getKeyChar()));
+		}
+		//Restart the timer.
+		timer.stop();
 		
+		timer = new KeyTimer(this);
+		timer.start();
+		//System.out.println("Timer Restarted");
+		//System.out.flush();
+		 * */
 		Product product = new Product(consoleInputField.getText(),stmt);
 		User user = new User(consoleInputField.getText(),stmt);
 		if(product.getName() != null && user.getName() == null)
@@ -272,12 +291,14 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 			//Product has been selected, add it to the current transaction (or start a transaction)
 			transaction.add(product);
 			consoleInputField.setText("");
+			consoleInputField.requestFocus();
 		}
 		else if (product.getName() == null && user.getName() != null)
 		{
 			//User has been selected.. tell the transaction
 			transaction.setUser(user);
 			consoleInputField.setText("");
+			consoleInputField.requestFocus();
 		}
 		else if (product.getName()!= null && user.getName() != null)
 		{
@@ -286,16 +307,16 @@ public class Fridge extends javax.swing.JFrame implements ActionListener, KeyLis
 		else
 		{
 			//Nothing special.. just let things keep going
-			/*try {
-				//Let the rest of the letters come in before we bother trying again
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
-			//System.out.println("Nothing found with that ID.. waiting");
 		}
-		//System.out.flush();
 	}
 
+	/**
+	 * Try doing a transaction (called by the keytimer when it's done counting)
+	 *
+	 */
+	public void tryTransaction() {
+		//System.out.println("Trying transaction");
+		//System.out.flush();
+			
+	}
 }

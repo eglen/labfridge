@@ -79,10 +79,15 @@ public class Transaction {
 		}
 		else
 		{
+			output.setText("");
+			if(clearThread != null)
+			{
+				clearThread.stop();
+			}
 			//If not, print out their tab
 			output.append("User: " + user.getName() + '\n');
 			output.append("Tab: " + df.format(user.getTab()/100.0) + '\n');
-			output.append("*Please keep a positive tab to" + '\n' + "*help us maintain product selection." + '\n');
+			output.append("** Please keep a positive tab to help us maintain product selection. **" + '\n');
 			clearThread = new CountdownClear(output);
 			clearThread.start();
 		}
